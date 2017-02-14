@@ -137,7 +137,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.forward_agent = true
 
   config.vm.box = "coreos-#{CHANNEL}"
-  config.vm.box_version = "= #{COREOS_VERSION}"
+  #config.vm.box_version = ">= #{COREOS_VERSION}"
   config.vm.box_url = "#{upstream}/coreos_production_vagrant.json"
 
   ["vmware_fusion", "vmware_workstation"].each do |vmware|
@@ -145,6 +145,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       override.vm.box_url = "#{upstream}/coreos_production_vagrant_vmware_fusion.json"
     end
   end
+  
+
+  config.vm.provider :libvirt do |lib, override|
+      override.vm.box = "coreos-lib"
+      override.vm.box_url = "https://atlas.hashicorp.com/w9n/coreos"
+  end
+
 
   config.vm.provider :parallels do |vb, override|
     override.vm.box = "AntonioMeireles/coreos-#{CHANNEL}"
@@ -458,13 +465,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           v.vmx["numvcpus"] = cpus
         end
       end
-      ["parallels", "virtualbox"].each do |h|
+      ["parallels", "virtualbox", "libvirt"].each do |h|
         kHost.vm.provider h do |n|
           n.memory = memory
           n.cpus = cpus
         end
       end
-
+      
       kHost.vm.network :private_network, ip: "#{BASE_IP_ADDR}.#{i+100}"
 
       # you can override this in synced_folders.yaml
